@@ -17,30 +17,30 @@
 
 using ttf::GlyphContour;
 #pragma pack(push, 1)
-// ヘッダー（32 B）
 struct FontAssetHeader {
-  char magic[8];           // "SDFONT1"
-  uint16_t major, minor;   // 1,0
-  uint16_t flags;          // 0 = 8‑bit SDF
-  uint16_t pixelSizePX;    // kGlyphPX
-  uint16_t borderPX;       // kBorderPX
-  uint16_t spreadPX;       // kRadiusPX
-  int16_t fontHeightPX;    // ascender‑descender
-  int16_t ascenderPX;      // baseline→top
-  int16_t descenderPX;     // baseline→bottom (負値)
-  uint16_t lineAdvancePX;  // 行送り
-  uint16_t texW, texH;     // アトラス寸法
-  uint16_t reserved;       // 今は 0
+  char magic[8];           
+  uint16_t major, minor;   
+  uint16_t flags;          
+  uint16_t pixelSizePX;    
+  uint16_t borderPX;       
+  uint16_t spreadPX;       
+  int16_t fontHeightPX;    
+  int16_t ascenderPX;      
+  int16_t descenderPX;     
+  uint16_t lineAdvancePX;  
+  uint16_t texW, texH;     
+  uint16_t reserved;       
   uint32_t glyphCount;
 };
-// 1 Glyph = 16 B
+
 struct GlyphRecord {
-  uint32_t codePoint;          // UTF‑32
-  uint16_t u, v, w, h;         // px
-  int16_t bearingX, bearingY;  // px
-  uint16_t advance;            // px
-  uint8_t atlasId;             // 0
-  uint8_t flags;               // 0
+  // UTF-32
+  uint32_t codePoint;           
+  uint16_t u, v, w, h;         
+  int16_t bearingX, bearingY;  
+  uint16_t advance;            
+  uint8_t atlasId;             
+  uint8_t flags;               
 };
 #pragma pack(pop)
 static constexpr int kSupersample = 64;
