@@ -73,13 +73,12 @@ void WriteFontAsset(const std::string& root,
                     const std::vector<uint8_t>& atlas, uint16_t texW,
                     uint16_t texH, int16_t fontHeightPX, int16_t ascPX,
                     int16_t descPX, uint16_t lineAdvancePX) {
-  /* ファイル名 .sdfb */
+
   char path[260];
   sprintf_s(path, "%s.sdfb", root.c_str());
   std::ofstream ofs(path, std::ios::binary);
   if (!ofs) throw std::runtime_error("open sdfb fail");
 
-  /* --- ヘッダー --- */
   FontAssetHeader hd{};
   memcpy(hd.magic, "SDFONT1", 7);
   hd.major = 1;
@@ -97,12 +96,9 @@ void WriteFontAsset(const std::string& root,
   hd.glyphCount = static_cast<uint32_t>(metas.size());
   ofs.write((char*)&hd, sizeof(hd));
 
-  /* --- GlyphTable --- 16B × N
-     ここでは「幅」と「advance」を “グリフ正方サイズ” に
-     仮置きしています。FontLoader から真値を取れるなら差し替え可 */
   GlyphRecord gr{};
   gr.w = gr.h = kGlyphPX;
-  gr.advance = kGlyphPX;  // 等幅前提
+  gr.advance = kGlyphPX;
   for (auto& m : metas) {
     gr.codePoint = static_cast<uint32_t>(m.cp);
     gr.u = m.u;
@@ -112,7 +108,6 @@ void WriteFontAsset(const std::string& root,
     ofs.write((char*)&gr, sizeof(gr));
   }
 
-  /* --- SDF 8‑bit ピクセル --- */
   ofs.write((char*)atlas.data(), atlas.size());
   ofs.close();
 }
@@ -378,20 +373,20 @@ int wmain(int argc, wchar_t** argv) {
     size_t i = 0;
     while (i < s.size()) {
       unsigned c = static_cast<unsigned char>(s[i]);
-      if (c < 0x80)  // 1B
+      if (c < 0x80)
       {
         out.push_back(c);
         ++i;
-      } else if ((c & 0xE0) == 0xC0)  // 2B
+      } else if ((c & 0xE0) == 0xC0)
       {
         out.push_back(((c & 0x1F) << 6) | (s[i + 1] & 0x3F));
         i += 2;
-      } else if ((c & 0xF0) == 0xE0)  // 3B
+      } else if ((c & 0xF0) == 0xE0)
       {
         out.push_back(((c & 0x0F) << 12) | ((s[i + 1] & 0x3F) << 6) |
                       (s[i + 2] & 0x3F));
         i += 3;
-      } else  // 4B
+      } else
       {
         out.push_back(((c & 0x07) << 18) | ((s[i + 1] & 0x3F) << 12) |
                       ((s[i + 2] & 0x3F) << 6) | (s[i + 3] & 0x3F));
@@ -438,12 +433,12 @@ int wmain(int argc, wchar_t** argv) {
   std::chrono::duration<double> elapsed = end - start;
   std::wcout << L"Elapsed time: " << elapsed.count() << L" seconds\n";
 
-  const int16_t asc = int16_t(kGlyphPX);     // 仮: 文字上端
-  const int16_t desc = -int16_t(kBorderPX);  // baseline より下 (負)
-  const int16_t fH = asc - desc;             // 高さ
+  const int16_t asc = int16_t(kGlyphPX);
+  const int16_t desc = -int16_t(kBorderPX);
+  const int16_t fH = asc - desc;           
   const uint16_t advY = uint16_t(kGlyphPX + kBorderPX);
 
-  WriteFontAsset("atlas_super",  // ルート名
+  WriteFontAsset("atlas_super",
                  metas, atlas, uint16_t(kAtlasW), uint16_t(atlas_h), fH, asc,
                  desc, advY);
 
