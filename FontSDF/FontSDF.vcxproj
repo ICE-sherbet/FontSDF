@@ -193,6 +193,7 @@
     <ClInclude Include="include\Serializer\Types\BuiltInType.h" />
     <ClInclude Include="include\Serializer\Types\string.h" />
     <ClInclude Include="include\Serializer\Types\vector.h" />
+    <ClInclude Include="jsonParse.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

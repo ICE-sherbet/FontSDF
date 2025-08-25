@@ -344,10 +344,69 @@ static void WriteBmp(const std::wstring& path, int w, int h,
   }
   ofs.close();
 }
+template <typename... Args>
+class EventSlim {
+  struct Slot {  // 16 B
+    void* obj;
+    void (*thunk)(void*, Args...);
+  };
+
+ public:
+  using Token = std::uint32_t;  // index 用
+
+  // 登録
+  Token Add(const Slot& s) {
+    if (!freeList_.empty()) {  // reuse hole
+      Token idx = freeList_.back();
+      freeList_.pop_back();
+      slots_[idx] = s;
+      return idx;
+    }
+    slots_.push_back(s);
+    return static_cast<Token>(slots_.size() - 1);
+  }
+
+  // 解除
+  bool Remove(Token t) {
+    if (t >= slots_.size() || !slots_[t].thunk) return false;
+    slots_[t].thunk = nullptr;
+    freeList_.push_back(t);
+    return true;
+  }
+
+  // 発火
+  void operator()(Args... args) const {
+    for (auto& s : slots_)
+      if (s.thunk) s.thunk(s.obj, args...);
+  }
+
+  void Reserve(std::size_t n) { slots_.reserve(n); }
+
+  /* ↓ Delegate 生成ヘルパは前回と同じ、Slot に詰めるだけ ↓ */
+  template <auto Fn>
+  Token AddFree() {
+    return Add({nullptr, [](void*, Args... as) { (*Fn)(as...); }});
+  }
+  template <class T, void (T::*M)(Args...)>
+  Token Add(T* obj) {
+    return Add(
+        {obj, [](void* o, Args... as) { (static_cast<T*>(o)->*M)(as...); }});
+  }
+  template <class Functor>
+  Token AddFunctor(Functor* f) {
+    return Add(
+        {f, [](void* o, Args... as) { (*static_cast<Functor*>(o))(as...); }});
+  }
+
+ private:
+  std::vector<Slot> slots_;      // only 16 B/slot
+  std::vector<Token> freeList_;  // holes
+};
 
 int wmain(int argc, wchar_t** argv) {
   
-
+  Hoge();
+  return 1;
   std::ifstream settings("FontSDFSettings.txt");
   if (!settings) {
 		std::wcerr << L"Settings file not found.\n";

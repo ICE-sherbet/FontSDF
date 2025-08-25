@@ -209,5 +209,8 @@
     <ClInclude Include="include\Serializer\TextSerializer.h">
       <Filter>ヘッダー ファイル\Serializer</Filter>
     </ClInclude>
+    <ClInclude Include="jsonParse.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
